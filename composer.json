@@ -1,0 +1,18 @@
+{
+    "name": "stechstudio/bref-extensions",
+    "description": "Stechstudio Extension Layer for Bref",
+    "type": "library",
+    "require": {
+        "ext-yaml": "^2.0",
+        "aws/aws-sdk-php": "^3.87",
+        "ext-curl": "^7.3",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bubba",
+            "email": "rob@stechstudio.com"
+        }
+    ]
+}

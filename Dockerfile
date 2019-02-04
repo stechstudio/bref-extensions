@@ -14,7 +14,7 @@ ENV BUILD_DIR="/tmp/build"
 
 # We need a base path for the builds to install to. This path must
 # match the path that bref will be unpackaged to in Lambda.
-ENV INSTALL_DIR="/opt/sts/"
+ENV INSTALL_DIR="/opt/sts"
 
 # We need some default compiler variables setup
 ENV PKG_CONFIG_PATH="${INSTALL_DIR}/lib64/pkgconfig:${INSTALL_DIR}/lib/pkgconfig:/opt/bref/lib64/pkgconfig:/opt/bref/lib/pkgconfig:${PKG_CONFIG_PATH}" \
@@ -25,7 +25,7 @@ ENV LD_LIBRARY_PATH="${INSTALL_DIR}/lib64:${INSTALL_DIR}/lib:/opt/bref/lib64:/op
 
 COPY --from=bref/runtime/php-full-73 /opt /opt
 
-RUN mkdir -p ${BUILD_DIR}
+RUN mkdir -p ${BUILD_DIR} && mkdir -p ${INSTALL_DIR}/modules
 
 
 
@@ -62,15 +62,25 @@ RUN set -xe; \
 
 ###############################################################################
 # Imagemagic
-ENV VERSION_IMAGEMAGICK=6.9.10-25
-WORKDIR  ${INSTALL_DIR}/
-RUN set -xe; \
-    curl -Ls https://imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-libs-${VERSION_IMAGEMAGICK}.x86_64.rpm \
-  | rpm2cpio | cpio -idmv \
- && curl -Ls https://imagemagick.org/download/linux/CentOS/x86_64/ImageMagick-${VERSION_IMAGEMAGICK}.x86_64.rpm \
-  | rpm2cpio | cpio -idmv \
- && mv /opt/sts/usr/bin/* /opt/sts/bin
+ENV VERSION_IMAGEMAGICK=6.9.10-10
+ENV IMAGEMAGICK_BUILD_DIR=${BUILD_DIR}/imagemagick
 
+RUN set -xe; \
+    mkdir -p ${IMAGEMAGICK_BUILD_DIR}; \
+    curl -Ls ftp://ftp.osuosl.org/pub/blfs/conglomeration/ImageMagick/ImageMagick-${VERSION_IMAGEMAGICK}.tar.xz \
+  | tar xJC ${IMAGEMAGICK_BUILD_DIR} --strip-components=1
+
+WORKDIR  ${IMAGEMAGICK_BUILD_DIR}/
+
+RUN set -xe; \
+    ./configure \
+        --prefix=${INSTALL_DIR} \
+        --sysconfdir=${INSTALL_DIR}/etc \
+        --enable-hdri     \
+        --with-gslib    \
+        --with-rsvg     \
+        --disable-static \
+ && make install-strip
 
 ###############################################################################
 # Imagic PHP Extension
@@ -83,6 +93,15 @@ RUN set -xe; \
 
 
 WORKDIR  ${IMAGICK_BUILD_DIR}/
+RUN set -xe; \
+    ./configure \
+        --prefix=${INSTALL_DIR} \
+        --with-imagick=${INSTALL_DIR} \
+ && make \
+ && cp ${IMAGICK_BUILD_DIR}/modules/imagick.so ${INSTALL_DIR}/modules/imagick.so
+
+
+
 
 
 

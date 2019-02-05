@@ -27,8 +27,16 @@ COPY --from=bref/runtime/php-full-73 /opt /opt
 
 RUN mkdir -p ${BUILD_DIR} && mkdir -p ${INSTALL_DIR}/modules
 
-
-
+RUN LD_LIBRARY_PATH="" yum install -y \
+    glib2-devel \
+	expat-devel \
+	libjpeg-turbo-devel \
+	giflib-devel \
+	libtiff-devel \
+	lcms2-devel \
+	libpng-devel \
+	gobject-introspection \
+	gobject-introspection-devel
 
 ###############################################################################
 # Ghostscript
@@ -94,15 +102,69 @@ RUN set -xe; \
 
 WORKDIR  ${IMAGICK_BUILD_DIR}/
 RUN set -xe; \
-    ./configure \
+    phpize \
+ && ./configure \
         --prefix=${INSTALL_DIR} \
         --with-imagick=${INSTALL_DIR} \
  && make \
  && cp ${IMAGICK_BUILD_DIR}/modules/imagick.so ${INSTALL_DIR}/modules/imagick.so
 
+###############################################################################
+# orc
+#
+ENV VERSION_ORC=0.4.28
+ENV ORC_BUILD_DIR=${BUILD_DIR}/
+RUN set -xe; \
+	mkdir -p ${ORC_BUILD_DIR}; \
+	curl -Ls https://gstreamer.freedesktop.org/data/src/orc/orc-${VERSION_ORC}.tar.xz \
+	| tar xJC ${ORC_BUILD_DIR} --strip-components=1
+
+WORKDIR  ${ORC_BUILD_DIR}/
+RUN set -xe; \
+    ./configure \
+	--prefix=${INSTALL_DIR} \
+	--enable-shared \
+    --disable-static \
+    --disable-dependency-tracking \
+ && make install-strip
 
 
+###############################################################################
+# libgsf
+#
+ENV VERSION_LIBGSF=1.14.45
+ENV LIBGSF_BUILD_DIR=${BUILD_DIR}/
+RUN set -xe; \
+	mkdir -p ${LIBGSF_BUILD_DIR}; \
+	curl -Ls https://download.gnome.org/sources/libgsf/$(echo $VERSION_LIBGSF| sed 's/\.[[:digit:]]\+$//')/libgsf-${VERSION_LIBGSF}.tar.xz\
+	| tar xJC ${LIBGSF_BUILD_DIR} --strip-components=1
 
+
+WORKDIR  ${LIBGSF_BUILD_DIR}/
+RUN set -xe; \
+    ./configure \
+	--prefix=${INSTALL_DIR} \
+	--enable-shared \
+    --disable-static \
+    --disable-dependency-tracking \
+ && make install-strip
+
+###############################################################################
+# libvips
+ENV VERSION_LIBVIPS=8.7.0
+ENV LIBVIPS_BUILD_DIR=${BUILD_DIR}/libvips
+
+RUN set -xe; \
+    mkdir -p ${LIBVIPS_BUILD_DIR}; \
+	curl -Ls https://github.com/libvips/libvips/releases/download/v${VERSION_LIBVIPS}/vips-${VERSION_LIBVIPS}.tar.gz \
+  | tar xzC ${LIBVIPS_BUILD_DIR} --strip-components=1
+
+WORKDIR  ${LIBVIPS_BUILD_DIR}/
+
+RUN set -xe; \
+	./configure \
+    --prefix=${INSTALL_DIR} \
+ && make install-strip
 
 
 

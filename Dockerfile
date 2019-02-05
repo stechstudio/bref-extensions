@@ -113,7 +113,7 @@ RUN set -xe; \
 # orc
 #
 ENV VERSION_ORC=0.4.28
-ENV ORC_BUILD_DIR=${BUILD_DIR}/
+ENV ORC_BUILD_DIR=${BUILD_DIR}/orc
 RUN set -xe; \
 	mkdir -p ${ORC_BUILD_DIR}; \
 	curl -Ls https://gstreamer.freedesktop.org/data/src/orc/orc-${VERSION_ORC}.tar.xz \
@@ -133,7 +133,7 @@ RUN set -xe; \
 # libgsf
 #
 ENV VERSION_LIBGSF=1.14.45
-ENV LIBGSF_BUILD_DIR=${BUILD_DIR}/
+ENV LIBGSF_BUILD_DIR=${BUILD_DIR}/libgsf
 RUN set -xe; \
 	mkdir -p ${LIBGSF_BUILD_DIR}; \
 	curl -Ls https://download.gnome.org/sources/libgsf/$(echo $VERSION_LIBGSF| sed 's/\.[[:digit:]]\+$//')/libgsf-${VERSION_LIBGSF}.tar.xz\
@@ -167,4 +167,51 @@ RUN set -xe; \
  && make install-strip
 
 
+###############################################################################
+# libvips-phpext
+ENV VERSION_EXT_LIBVIPS=1.0.7
+ENV LIBVIPS_EXT_BUILD_DIR=${BUILD_DIR}/libvips-ext
 
+RUN set -xe; \
+    mkdir -p ${LIBVIPS_EXT_BUILD_DIR}; \
+	curl -Ls https://github.com/libvips/php-vips-ext/releases/download/v${VERSION_EXT_LIBVIPS}/vips-${VERSION_EXT_LIBVIPS}.tgz\
+  | tar xzC ${LIBVIPS_EXT_BUILD_DIR} --strip-components=1
+
+WORKDIR  ${LIBVIPS_EXT_BUILD_DIR}/
+
+RUN set -xe; \
+    phpize \
+ && ./configure \
+    --prefix=${INSTALL_DIR} \
+ && make \
+ && cp ${LIBVIPS_EXT_BUILD_DIR}/modules/vips.so ${INSTALL_DIR}/modules/vips.so
+
+#strip all the unneeded symbols from shared libraries to reduce size.
+RUN find ${INSTALL_DIR} -type f -name "*.so*" -o -name "*.a"  -exec strip --strip-unneeded {} \;
+RUN find ${INSTALL_DIR} -type f -executable -exec sh -c "file -i '{}' | grep -q 'x-executable; charset=binary'" \; -print|xargs strip --strip-all
+
+# Cleanup all the binaries we don't want.
+RUN find ${INSTALL_DIR}/bin -mindepth 1 -maxdepth 1 ! -name "convert" ! -name "gs" ! -name "identify" ! -name "vips" ! -name "vipsthumbnail" -exec rm {} \+
+
+# Cleanup all the files we don't want either
+RUN rm -rf ${INSTALL_DIR}/share/doc \
+ && rm -rf ${INSTALL_DIR}/share/man \
+ && rm -rf ${INSTALL_DIR}/share/gtk-doc \
+ && rm -rf ${INSTALL_DIR}/include \
+ && rm -rf ${INSTALL_DIR}/tests \
+ && rm -rf ${INSTALL_DIR}/doc \
+ && rm -rf ${INSTALL_DIR}/docs \
+ && rm -rf ${INSTALL_DIR}/man \
+ && rm -rf ${INSTALL_DIR}/www \
+ && rm -rf ${INSTALL_DIR}/cfg \
+ && rm -rf ${INSTALL_DIR}/libexec \
+ && rm -rf ${INSTALL_DIR}/var \
+ && rm -rf ${INSTALL_DIR}/data
+
+# Symlink all our binaries into /opt/bin so that Lambda sees them in the path.
+RUN mkdir -p /opt/bin
+RUN ln -s ${INSTALL_DIR}/bin/* /opt/bin
+
+# Zip the layer
+WORKDIR /opt
+RUN zip --quiet --recurse-paths /tmp/sts-php-73.zip . --exclude "bref*"

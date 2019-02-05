@@ -21,6 +21,7 @@ This will make the following available to your bref based project:
 ```
 sh-4.2# pwd
 /opt/bin
+
 sh-4.2# ls -al
 total 8
 drwxr-xr-x 1 root root 4096 Feb  5 19:33 .
@@ -30,20 +31,24 @@ lrwxrwxrwx 1 root root   15 Feb  5 19:33 gs -> /opt/sts/bin/gs
 lrwxrwxrwx 1 root root   21 Feb  5 19:33 identify -> /opt/sts/bin/identify
 lrwxrwxrwx 1 root root   17 Feb  5 19:33 vips -> /opt/sts/bin/vips
 lrwxrwxrwx 1 root root   26 Feb  5 19:33 vipsthumbnail -> /opt/sts/bin/vipsthumbnail
+
 sh-4.2# convert --version
 Version: ImageMagick 6.9.10-10 Q16 x86_64 2019-02-05 https://www.imagemagick.org
 Copyright: © 1999-2018 ImageMagick Studio LLC
 License: https://www.imagemagick.org/script/license.php
 Features: Cipher DPC HDRI OpenMP
 Delegates (built-in): bzlib jng jpeg lcms png tiff xml zlib
+
 sh-4.2# gs --version
 9.26
+
 sh-4.2# identify --version
 Version: ImageMagick 6.9.10-10 Q16 x86_64 2019-02-05 https://www.imagemagick.org
 Copyright: © 1999-2018 ImageMagick Studio LLC
 License: https://www.imagemagick.org/script/license.php
 Features: Cipher DPC HDRI OpenMP
 Delegates (built-in): bzlib jng jpeg lcms png tiff xml zlib
+
 sh-4.2# vips --version
 vips-8.7.0-Fri Aug 31 14:11:19 UTC 2018
 ```
@@ -51,6 +56,7 @@ as well as the following PHP extensions:
 ```
 sh-4.2# pwd
 /opt/sts/modules
+
 sh-4.2# ls -al
 total 1288
 drwxr-xr-x 1 root root    4096 Feb  5 19:17 .

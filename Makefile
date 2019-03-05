@@ -9,7 +9,7 @@ php:
 	docker build -f ${PWD}/php.Dockerfile -t bref/runtime/php-full-73:latest $(shell ${PWD}/bref/runtime/php/helpers/docker_args.php php73) .
 
 extensions:
-	docker build -v ${PWD}/artifacts:/artifacts -t stechstudio/bref/extensions .
+	docker build -t stechstudio/bref/extensions .
 
 zip:
 	$(eval DOCKERID := $(shell docker create stechstudio/bref/extensions))

@@ -14,8 +14,8 @@ Resources:
         Properties:
             [...]
             Layers:
-                - 'arn:aws:lambda:us-east-1:209497400698:layer:php-73:1'
-                - 'arn:aws:lambda:us-east-1:965741605173:layer:sts-bref-extensions:1'
+                - 'arn:aws:lambda:us-east-1:209497400698:layer:php-73:2'
+                - 'arn:aws:lambda:us-east-1:965741605173:layer:sts-bref-extensions:2'
 ```
 This will make the following available to your bref based project:
 ```
@@ -67,9 +67,10 @@ drwxr-xr-x 1 root root    4096 Feb  5 19:33 ..
 
 ## Installation
 ```
-git clone git@github.com:stechstudio/bref-extensions.git
-git submodule init bref
-make
+$ git clone git@github.com:stechstudio/bref-extensions.git
+$ cd bref-extensions
+$ git submodule init bref
+$ make
 ```
 
 ## Make Targets

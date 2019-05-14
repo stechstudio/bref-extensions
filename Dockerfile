@@ -212,6 +212,12 @@ RUN rm -rf ${INSTALL_DIR}/share/doc \
 RUN mkdir -p /opt/bin
 RUN ln -s ${INSTALL_DIR}/bin/* /opt/bin
 
+# Create php ini files
+RUN rm -rf /opt/bref*
+RUN mkdir -p /opt/bref/etc/php/conf.d
+RUN echo "extension=/opt/sts/modules/imagick.so" >> /opt/bref/etc/php/conf.d/imagick.ini
+RUN echo "extension=/opt/sts/modules/vips.so" >> /opt/bref/etc/php/conf.d/vips.ini
+
 # Zip the layer
 WORKDIR /opt
-RUN zip --quiet --recurse-paths /tmp/sts-php-73.zip . --exclude "bref*"
+RUN zip --quiet --recurse-paths /tmp/sts-php-73.zip .

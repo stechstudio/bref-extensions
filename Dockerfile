@@ -186,6 +186,26 @@ RUN set -xe; \
  && make \
  && cp ${LIBVIPS_EXT_BUILD_DIR}/modules/vips.so ${INSTALL_DIR}/modules/vips.so
 
+
+###############################################################################
+# parallel
+ENV VERSION_EXT_PARALLEL=1.1.3
+ENV PARALLEL_EXT_BUILD_DIR=${BUILD_DIR}/parallel-ext
+
+RUN set -xe; \
+    mkdir -p ${PARALLEL_EXT_BUILD_DIR}; \
+	curl -Ls https://github.com/krakjoe/parallel/archive/v${VERSION_EXT_PARALLEL}.tar.gz \
+  | tar xzC ${PARALLEL_EXT_BUILD_DIR} --strip-components=1
+
+WORKDIR  ${PARALLEL_EXT_BUILD_DIR}/
+
+RUN set -xe; \
+    phpize \
+ && ./configure --enable-parallel \
+    --prefix=${INSTALL_DIR} \
+ && make \
+ && cp ${PARALLEL_EXT_BUILD_DIR}/modules/parallel.so ${INSTALL_DIR}/modules/parallel.so
+
 #strip all the unneeded symbols from shared libraries to reduce size.
 RUN find ${INSTALL_DIR} -type f -name "*.so*" -o -name "*.a"  -exec strip --strip-unneeded {} \;
 RUN find ${INSTALL_DIR} -type f -executable -exec sh -c "file -i '{}' | grep -q 'x-executable; charset=binary'" \; -print|xargs strip --strip-all

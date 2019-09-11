@@ -69,7 +69,7 @@ drwxr-xr-x 1 root root    4096 Feb  5 19:33 ..
 ```
 $ git clone git@github.com:stechstudio/bref-extensions.git
 $ cd bref-extensions
-$ git submodule init bref
+$ git submodule update --init --recursive
 $ make
 ```
 
